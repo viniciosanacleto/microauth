@@ -12,6 +12,8 @@
 */
 
 /** USER ROUTES */
-$router->post('user/register', 'UserController@create');
+$router->group(['middleware' => 'source'], function () use ($router) {
+    $router->post('user/register', 'UserController@create');
+});
 $router->post('verify', 'AuthController@verify');
 $router->post('login', 'AuthController@login');
