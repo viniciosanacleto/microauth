@@ -5,6 +5,7 @@ namespace App\Tasks\Auth;
 
 
 use common\abstracts\Task;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\ValidationData;
 
 class ValidateJWTTask extends Task
@@ -32,10 +33,18 @@ class ValidateJWTTask extends Task
      */
     protected function handle()
     {
+        $signer = new Sha256();
         $validationData = new ValidationData();
         $validationData->setIssuer('microauth');
         $validationData->setId($this->user['email']);
 
+
+        //Verify signature first
+        if(!$this->token->verify($signer,env('AUTH_SIGNATURE'))){
+            return false;
+        }
+
+        //Then verify the information
         return $this->token->validate($validationData);
     }
 }

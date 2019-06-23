@@ -48,7 +48,7 @@ class AuthController extends Controller
      */
     public function verify(Request $request){
         //Transform token to object
-        $token = (new JWTParser())->parse($request->token);
+        $token = (new JWTParser())->parse($request['token']);
 
         //Check if the user active token is the same of the request
         $user = User::find($token->getClaim('uid'));

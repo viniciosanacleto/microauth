@@ -6,6 +6,8 @@ namespace App\Tasks\Auth;
 
 use common\abstracts\Task;
 use Lcobucci\JWT\Builder as JWTBuilder;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key;
 
 class CreateJWTTask extends Task
 {
@@ -31,6 +33,7 @@ class CreateJWTTask extends Task
      */
     protected function handle()
     {
+        $signer = new Sha256();
         $time = time();
         $token = (new JWTBuilder())
             ->issuedBy('microauth')
@@ -38,7 +41,7 @@ class CreateJWTTask extends Task
             ->issuedAt($time)
             ->expiresAt($time + $this->expirationTime)
             ->withClaim('uid',$this->user['id'])
-            ->getToken();
+            ->getToken($signer, new Key(env('AUTH_SIGNATURE')));
 
         return $token;
     }
