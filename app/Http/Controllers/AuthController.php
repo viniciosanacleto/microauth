@@ -31,7 +31,7 @@ class AuthController extends Controller
         }
 
         //If password pass generate a new token
-        $token = (new CreateJWTTask($user,60))->run();
+        $token = (new CreateJWTTask($user))->run();
 
         //Save the active token
         $user['active_token'] = $token;

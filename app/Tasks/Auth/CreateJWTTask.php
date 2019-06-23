@@ -12,17 +12,15 @@ use Lcobucci\JWT\Signer\Key;
 class CreateJWTTask extends Task
 {
     private $user;
-    private $expirationTime;
 
     /**
      * CreateJWTTask constructor.
      * @param $user
      * @param $expirationTime
      */
-    public function __construct($user, $expirationTime = 3600)
+    public function __construct($user)
     {
         $this->user = $user;
-        $this->expirationTime = $expirationTime;
     }
 
 
@@ -39,7 +37,7 @@ class CreateJWTTask extends Task
             ->issuedBy('microauth')
             ->identifiedBy($this->user['email'],true)
             ->issuedAt($time)
-            ->expiresAt($time + $this->expirationTime)
+            ->expiresAt($time + env('AUTH_TOKEN_EXPIRATION_TIME'))
             ->withClaim('uid',$this->user['id'])
             ->getToken($signer, new Key(env('AUTH_SIGNATURE')));
 
