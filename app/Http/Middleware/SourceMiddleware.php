@@ -23,7 +23,7 @@ class SourceMiddleware
         if(empty($sourceToken)){
             return response()->json([
                 'success'=>false,
-                'data'=> 'Authorization Token not valid!'
+                'data'=> 'Authorization token in the request header is not valid!'
             ],401);
         }
         return $next($request);
