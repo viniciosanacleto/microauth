@@ -17,14 +17,14 @@ class UserController extends Controller
             'password' => 'required'
         ]);
         if ($validation->fails()) {
-            return response(['errors' => $validation->errors(), 'message' => 'Failed to create a new User.'], 400);
+            return response(['errors' => $validation->errors(), 'message' => 'Failed to create a new User'], 400);
         }
 
         try {
             User::create($request->all());
             return response(['message' => 'User successfully created!']);
         } catch (\Exception $e) {
-            return response(['errors' => $e->getMessage(), 'message' => 'Failed to create a new User.'], 500);
+            return response(['errors' => $e->getMessage(), 'message' => 'Failed to create a new User'], 500);
         }
     }
 }

@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Tasks\Auth\CreateJWTTask;
 use App\Tasks\Auth\ValidateJWTTask;
-use common\utils\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Lcobucci\JWT\Parser as JWTParser;
 
 class AuthController extends Controller
@@ -18,16 +18,25 @@ class AuthController extends Controller
      * @return array
      * @throws \Exception
      */
-    public function login(Request $request){
+    public function login(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+        if ($validation->fails()) {
+            return response(['errors' => $validation->errors(), 'message' => 'Failed to Login'], 400);
+        }
+
         //Get user based on email
-        $user = User::where('email',$request['email'])->first();
-        if(empty($user)){
-            return Response::build(false,'User not found.');
+        $user = User::where('email', $request['email'])->first();
+        if (empty($user)) {
+            return response(['message' => 'User not found'], 404);
         }
 
         //Check password
-        if(!Hash::check($request['password'],$user['password'])){
-            return Response::build(false, 'Wrong password.');
+        if (!Hash::check($request['password'], $user['password'])) {
+            return response(['message' => 'Wrong password'], 400);
         }
 
         //If password pass generate a new token
@@ -37,7 +46,11 @@ class AuthController extends Controller
         $user['active_token'] = $token;
         $user->save();
 
-        return Response::build(true,['token'=>(string)$token,'loginAt'=>date('Y-m-d H:i:s')]);
+        return response([
+            'token' => (string)$token,
+            'login_at' => date('Y-m-d H:i:s'),
+            'email' => $user->email
+        ]);
     }
 
     /**
@@ -46,19 +59,20 @@ class AuthController extends Controller
      * @return mixed
      * @throws \Exception
      */
-    public function verify(Request $request){
+    public function verify(Request $request)
+    {
         //Transform token to object
         $token = (new JWTParser())->parse($request['token']);
 
         //Check if the user active token is the same of the request
         $user = User::find($token->getClaim('uid'));
-        if($user['active_token'] !== (string)$token){
-            return Response::build(false,'Token is not valid.');
+        if ($user['active_token'] !== (string)$token) {
+            return response(['message' => 'Token not valid'], 401);
         }
 
         //Check token availability
-        $tokenAvailability = (new ValidateJWTTask($token,$user))->run();
+        $tokenAvailability = (new ValidateJWTTask($token, $user))->run();
 
-        return Response::build(true,['token'=>(string)$token,'valid'=>$tokenAvailability]);
+        return response(['message'=>'Token is valid']);
     }
 }
