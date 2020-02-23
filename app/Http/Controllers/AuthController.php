@@ -61,6 +61,13 @@ class AuthController extends Controller
      */
     public function verify(Request $request)
     {
+        $validation = Validator::make($request->all(), [
+            'token' => 'required'
+        ]);
+        if ($validation->fails()) {
+            return response(['errors' => $validation->errors(), 'message' => 'Failed to verify token'], 400);
+        }
+
         //Transform token to object
         $token = (new JWTParser())->parse($request['token']);
 
@@ -73,6 +80,6 @@ class AuthController extends Controller
         //Check token availability
         $tokenAvailability = (new ValidateJWTTask($token, $user))->run();
 
-        return response(['message'=>'Token is valid']);
+        return response(['message' => 'Token is valid']);
     }
 }
