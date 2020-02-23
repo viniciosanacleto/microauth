@@ -41,6 +41,7 @@ class AuthController extends Controller
 
         //If password pass generate a new token
         $token = (new CreateJWTTask($user))->run();
+        $parsedToken = (new JWTParser())->parse((string)$token);
 
         //Save the active token
         $user['active_token'] = $token;
@@ -49,6 +50,7 @@ class AuthController extends Controller
         return response([
             'token' => (string)$token,
             'login_at' => date('Y-m-d H:i:s'),
+            'expires_at' => date('Y-m-d H:i:s', $parsedToken->getClaim('exp')),
             'email' => $user->email
         ]);
     }
