@@ -14,6 +14,7 @@
 /** USER ROUTES */
 $router->group(['middleware' => 'source'], function () use ($router) {
     $router->post('user/register', 'UserController@create');
+    $router->get('user/check-email-exist', 'UserController@checkEmailExist');
 });
 
 /** AUTH ROUTES */

@@ -26,4 +26,21 @@ class UserController extends Controller
             return response(['errors' => $e->getMessage(), 'message' => 'Failed to create a new User'], 500);
         }
     }
+
+    public function checkEmailExist(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+        if ($validation->fails()) {
+            return response(['errors' => $validation->errors(), 'message' => 'Failed to check email'], 400);
+        }
+
+        //Find user
+        $user = User::where(["email" => $request->input('email')])->first();
+        if (empty($user)) {
+            return response(['message' => 'Email not used'], 404);
+        }
+        return response(['message' => 'Email already taken']);
+    }
 }
